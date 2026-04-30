@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.openapi.utils import get_openapi
 from langchain_community.document_loaders import PyPDFLoader
 from typing import Annotated
 from dotenv import load_dotenv
@@ -12,6 +13,36 @@ load_dotenv()
 app= FastAPI()
 app.openapi_version = "3.0.3"
 llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0)
+
+def convert_file_schemas(schema):
+    if isinstance(schema, dict):
+        if schema.get("type") == "string" and "contentMediaType" in schema:
+            schema.pop("contentMediaType", None)
+            schema["format"] = "binary"
+
+        for value in schema.values():
+            convert_file_schemas(value)
+    elif isinstance(schema, list):
+        for item in schema:
+            convert_file_schemas(item)
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title="PDF Summary Lab",
+        version="0.1.0",
+        routes=app.routes,
+        openapi_version=app.openapi_version,
+    )
+    convert_file_schemas(openapi_schema)
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
 
 @app.get("/")
 def home():
