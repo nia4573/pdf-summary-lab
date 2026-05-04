@@ -4,3 +4,10 @@ __pycache__/
 *.pyc
 uploads/
 outputs/
+
+# Node
+node_modules/
+client/node_modules/
+
+# Vite
+client/dist/

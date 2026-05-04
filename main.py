@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from langchain_community.document_loaders import PyPDFLoader
 from typing import Annotated
@@ -10,9 +11,17 @@ import tempfile
 
 load_dotenv()
 
-app= FastAPI()
+app = FastAPI()
 app.openapi_version = "3.0.3"
 llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def convert_file_schemas(schema):
     if isinstance(schema, dict):
@@ -50,8 +59,8 @@ def home():
 
 @app.post("/summarize-pdfs")
 async def summarize_pdfs(
-     files: Annotated[list[UploadFile], File(description="Upload one or more PDF files")],
-) :
+    files: Annotated[list[UploadFile], File(description="Upload one or more PDF files")],
+):
     summaries = []
 
     for file in files:
@@ -104,7 +113,6 @@ async def summarize_pdfs(
                     "summary_result": response.content,
                 }
             )
-
         finally:
             os.remove(temp_path)
 
