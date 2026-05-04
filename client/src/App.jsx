@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import './App.css'
 
 const API_URL = 'http://localhost:8000/summarize-pdfs'
@@ -16,6 +16,7 @@ function parseSummary(summaryResult) {
 }
 
 function App() {
+  const fileInputRef = useRef(null)
   const [files, setFiles] = useState([])
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
@@ -30,6 +31,16 @@ function App() {
     setFiles(Array.from(event.target.files))
     setResult(null)
     setError('')
+  }
+
+  function handleReset() {
+    setFiles([])
+    setResult(null)
+    setError('')
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   async function handleSubmit(event) {
@@ -84,6 +95,7 @@ function App() {
               여러 개의 PDF를 한 번에 업로드할 수 있습니다.
             </span>
             <input
+              ref={fileInputRef}
               type="file"
               accept="application/pdf,.pdf"
               multiple
@@ -110,9 +122,26 @@ function App() {
 
           {error && <p className="error-message">{error}</p>}
 
-          <button className="submit-button" type="submit" disabled={isLoading}>
-            {isLoading ? '요약 중...' : '요약하기'}
-          </button>
+          <div className="form-actions">
+            <button
+              className="submit-button"
+              type="submit"
+              disabled={isLoading}
+            >
+              {isLoading ? '요약 중...' : '요약하기'}
+            </button>
+
+            {(files.length > 0 || result || error) && (
+              <button
+                className="reset-button"
+                type="button"
+                onClick={handleReset}
+                disabled={isLoading}
+              >
+                다른 파일 요약하기
+              </button>
+            )}
+          </div>
         </form>
       </section>
 

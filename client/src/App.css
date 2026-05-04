@@ -117,18 +117,34 @@
   color: var(--muted);
 }
 
-.submit-button {
+.form-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.submit-button,
+.reset-button {
   min-height: 44px;
-  border: 0;
   border-radius: 6px;
-  background: var(--accent);
-  color: #ffffff;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
 }
 
-.submit-button:disabled {
+.submit-button {
+  border: 0;
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.reset-button {
+  border: 1px solid var(--border-strong);
+  background: #ffffff;
+  color: var(--text-strong);
+}
+
+.submit-button:disabled,
+.reset-button:disabled {
   cursor: wait;
   opacity: 0.65;
 }
